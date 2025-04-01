@@ -1,0 +1,4 @@
+.build
+jetpack_client
+jetpack_server
+*.o
