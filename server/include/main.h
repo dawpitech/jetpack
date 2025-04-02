@@ -8,4 +8,6 @@
 #ifndef MAIN_H
     #define MAIN_H
 
+    #define EXIT_FAILURE_TECH 84
+
 #endif //MAIN_H

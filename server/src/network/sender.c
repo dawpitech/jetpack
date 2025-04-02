@@ -2,12 +2,5 @@
 ** EPITECH PROJECT, 2025
 ** jetpack
 ** File description:
-** main.c
+** sender.c
 */
-
-#include "main.h"
-
-int main(void)
-{
-    return 0;
-}
