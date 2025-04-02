@@ -17,7 +17,9 @@ CXXFLAGS	+=	-Wshadow
 CXXFLAGS	+=	-Wunreachable-code
 CXXFLAGS	+=	-pedantic
 CXXFLAGS	+=	-iquote .
+CXXFLAGS	+=	-iquote common
 CXXFLAGS	+=	-MMD -MP
+CXXFLAGS	+=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -g3 -O1
 
 CFLAGS		=	-std=gnu11
 CFLAGS		+=	-W
@@ -28,13 +30,14 @@ CFLAGS		+=	-Wshadow
 CFLAGS		+=	-Wunreachable-code
 CFLAGS		+=	-Wmissing-prototypes
 CFLAGS		+=	-pedantic
-CFLAGS		+=	-iquote .
+CFLAGS		+=	-iquote server/include
+CFLAGS		+=	-iquote common
 CFLAGS		+=	-MMD -MP
 
 BDIR		=	.build
 
 CLIENT_SRC	=	$(shell find client -name "*.cpp")
-SERVER_SRC	=	$(shell find server -name "*.c")
+SERVER_SRC	=	$(shell find server/src -name "*.c")
 
 CLIENT_OBJ	=	$(CLIENT_SRC:%.cpp=$(BDIR)/client/%.o)
 SERVER_OBJ	=	$(SERVER_SRC:%.c=$(BDIR)/server/%.o)

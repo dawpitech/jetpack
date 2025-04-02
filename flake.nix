@@ -18,6 +18,7 @@
             man-pages-posix
             gdb
             mold
+            sfml
           ];
         };
 
