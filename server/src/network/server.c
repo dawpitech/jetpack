@@ -13,11 +13,12 @@
 
 #include "network/packets.h"
 #include "server.h"
+#include "physics.h"
 #include "logger.h"
 
 static void delete_client(server_t *server, client_t *client)
 {
-    if (client->network_fd != 0)
+    if (client->network_fd > 0)
         close(client->network_fd);
     memset(client, 0, sizeof(client_t));
     server->connected_client_nb -= 1;
@@ -56,7 +57,7 @@ static void searching_new_clients(server_t *server)
     client->status = PENDING_HELLO;
     client->id = (int) server->connected_client_nb;
     client->x = 0;
-    client->y = 400;
+    client->y = 200;
     server->connected_client_nb += 1;
 }
 
@@ -69,10 +70,11 @@ static void computeIncomingPacket(server_t *server, client_t *client)
     const long bytes_read = read(client->network_fd, buff, 4096);
 
     logc(client, info, server, "Incoming data");
-    if (bytes_read == 0) {
+    if (bytes_read == 0 || buff[0] == '\0') {
         delete_client(server, client);
         return;
     }
+    //printf("%c : %d", buff[0], buff[0]);
     generic_packet = (packet_generic_t *) &buff;
     logc(client, info, server, "Received packet type is %d",
         generic_packet->type);
@@ -96,8 +98,9 @@ static void events_loop(server_t *server)
             continue;
         add_to_poll(&poll_config, server->clients[i].network_fd,
             &server->clients[i]);
+        compute_physics(server, &server->clients[i]);
     }
-    poll(poll_config.polls, poll_config.size, -1);
+    poll(poll_config.polls, poll_config.size, 1);
     for (size_t i = 0; i < poll_config.size; i++) {
         if (poll_config.polls[i].revents == 0)
             continue;

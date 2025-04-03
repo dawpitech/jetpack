@@ -4,3 +4,17 @@
 ** File description:
 ** sender.c
 */
+
+#include <unistd.h>
+
+#include "logger.h"
+#include "server.h"
+#include "network/packets.h"
+
+void update_player(const server_t *server, const client_t *client)
+{
+    const packet_player_update_t packet = {.type = PLAYER_UPDATE, .x = client->x,
+        .y = client->y, .on_the_floor = client->on_the_floor};
+    write(client->network_fd, &packet, sizeof(packet_player_update_t));
+    logc(client, info, server, "Update player position");
+}

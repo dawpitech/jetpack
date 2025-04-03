@@ -16,7 +16,7 @@
     #include "network/packets.h"
 
     #define SERVER_MAX_CLIENTS 4
-    #define PACKET_BUFFER_SIZE 1024
+
 
 enum connection_status {
     UNKNOWN,
@@ -35,6 +35,7 @@ typedef struct {
     struct timespec physic_clock;
     float x;
     float y;
+    bool on_the_floor;
 } client_t;
 
 typedef struct {
@@ -60,7 +61,7 @@ typedef struct {
 int init_server(server_t *server);
 void launch_server(server_t *server);
 
-void update
+void update_player(const server_t *server, const client_t *client);
 
 void hello_handler(client_t *client, char buff[PACKET_BUFFER_SIZE]);
 
