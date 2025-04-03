@@ -8,9 +8,11 @@
 #ifndef CLIENT_HPP
     #define CLIENT_HPP
 
-#include <netinet/in.h>
-#include <string>
-#include <thread>
+    #include <netinet/in.h>
+    #include <string>
+    #include <thread>
+
+    #include "client/game/Player.hpp"
 
 class ServerConnection
 {
@@ -18,7 +20,7 @@ class ServerConnection
         ServerConnection(const std::string &ip, unsigned short port);
         ~ServerConnection() = default;
 
-        void run();
+        void run(Player&);
         void stop();
 
     private:
@@ -27,7 +29,7 @@ class ServerConnection
         int network_fd;
         std::unique_ptr<std::thread> network_thread;
 
-        void handleNetwork();
+        void handleNetwork(Player&) const;
 };
 
 #endif //CLIENT_HPP

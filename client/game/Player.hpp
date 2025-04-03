@@ -9,7 +9,6 @@
     #define PLAYER_HPP
 
     #include <SFML/Graphics.hpp>
-    #include <SFML/System.hpp>
 
 class Player
 {
@@ -18,11 +17,14 @@ class Player
         ~Player() = default;
 
         void render(sf::RenderWindow&);
+        void setPos(float x, float y);
+        void setOnFloor(bool);
 
     private:
         sf::Texture _texture;
         std::size_t curr_tile;
         sf::Sprite _sprite;
         sf::Clock _sprite_clock;
+        bool onFloor = false;
 };
 #endif //PLAYER_HPP

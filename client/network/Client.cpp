@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <poll.h>
 
 #include "Client.hpp"
 #include "network/packets.h"
@@ -26,16 +27,39 @@ ServerConnection::ServerConnection(const std::string &ip, const unsigned short p
     write(this->network_fd, &packet, sizeof(packet));
 }
 
-void ServerConnection::run() {
-    this->network_thread = std::make_unique<std::thread>([this]() { this->handleNetwork(); });
+void ServerConnection::run(Player& player) {
+    this->network_thread = std::make_unique<std::thread>([this, &player]() { this->handleNetwork(player); });
 }
 
-void ServerConnection::handleNetwork() {
+void ServerConnection::handleNetwork(Player& player) const
+{
+    pollfd pollConfig = {
+        .fd = this->network_fd,
+        .events = POLLIN,
+        .revents = 0,
+    };
+    char buff[PACKET_BUFFER_SIZE] = {0};
+
     while (true) {
+        poll(&pollConfig, 1, -1);
         if (!this->should_run)
             return;
-        printf("network thread running\n");
-        sleep(1);
+        printf("network stack up\n");
+        const long bytes_r = read(this->network_fd, buff, PACKET_BUFFER_SIZE);
+        if (bytes_r == 0 || buff[0] == '\0')
+            return;
+        switch (reinterpret_cast<packet_generic_t*>(&buff)->type)
+        {
+            case PLAYER_UPDATE:
+            {
+                const auto packet = reinterpret_cast<packet_player_update_t*>(&buff);
+                player.setPos(packet->x, packet->y);
+                player.setOnFloor(packet->on_the_floor);
+                break;
+            }
+            default:
+                break;
+        }
     }
 }
 

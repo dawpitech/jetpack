@@ -10,7 +10,7 @@
 void JetpackClient::initNetworkThread(const std::string& ip, unsigned short port)
 {
     this->_connection = std::make_unique<ServerConnection>(ip, port);
-    this->_connection->run();
+    this->_connection->run(this->_player);
 }
 
 void JetpackClient::launch()
@@ -19,6 +19,7 @@ void JetpackClient::launch()
     while (true) {
         this->_window.clear();
         //printf("render\n");
+        this->_background.render(this->_window);
         this->_player.render(this->_window);
         this->_window.display();
 
