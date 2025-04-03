@@ -22,7 +22,7 @@ static void delete_client(server_t *server, client_t *client)
         close(client->network_fd);
     memset(client, 0, sizeof(client_t));
     server->connected_client_nb -= 1;
-    logm(err, server, "Connection with client was closed abruptly");
+    logm(ERR, server, "Connection with client was closed abruptly");
 }
 
 static client_t *get_empty_client_slot(server_t *server)
@@ -52,40 +52,39 @@ static void searching_new_clients(server_t *server)
     client = get_empty_client_slot(server);
     client->network_fd = accept(server->server_fd,
         (struct sockaddr*) &client->network_sock, &client_len);
-    logm(info, server, "New connection from %s",
+    logm(INFO, server, "New connection from %s",
         inet_ntoa(client->network_sock.sin_addr));
     client->status = PENDING_HELLO;
     client->id = (int) server->connected_client_nb;
     client->x = 0;
     client->y = 200;
+    client->debug = server->debug;
     server->connected_client_nb += 1;
 }
 
 // ReSharper disable once CppJoinDeclarationAndAssignment
-static void computeIncomingPacket(server_t *server, client_t *client)
+static void compute_incoming_packet(server_t *server, client_t *client)
 {
     char buff[4096] = {0};
     bool found = false;
-    packet_generic_t *generic_packet;
+    packet_generic_t *gpkt;
     const long bytes_read = read(client->network_fd, buff, 4096);
 
-    logc(client, info, server, "Incoming data");
+    logc(client, INFO, "Incoming data");
     if (bytes_read == 0 || buff[0] == '\0') {
         delete_client(server, client);
         return;
     }
-    //printf("%c : %d", buff[0], buff[0]);
-    generic_packet = (packet_generic_t *) &buff;
-    logc(client, info, server, "Received packet type is %d",
-        generic_packet->type);
+    gpkt = (packet_generic_t *) &buff;
+    logc(client, INFO, "Received packet type is %d", gpkt->type);
     for (size_t i = 0; i < HANDLERS_SIZE; i++) {
-        if (HANDLERS[i].packet_type != generic_packet->type)
+        if (HANDLERS[i].packet_type != gpkt->type)
             continue;
         HANDLERS[i].handler(client, buff);
         found = true;
     }
     if (!found)
-        logc(client, err, server, "No suitable handler for packet!");
+        logc(client, ERR, "No suitable handler for packet!");
 }
 
 static void events_loop(server_t *server)
@@ -107,14 +106,14 @@ static void events_loop(server_t *server)
         if (i == 0)
             searching_new_clients(server);
         else
-            computeIncomingPacket(server, poll_config.clients[i]);
+            compute_incoming_packet(server, poll_config.clients[i]);
     }
 }
 
 // ReSharper disable once CppDFAEndlessLoop
 void launch_server(server_t *server)
 {
-    logm(info, server, "Listening on 0.0.0.0:%d", server->port);
+    logm(INFO, server, "Listening on 0.0.0.0:%d", server->port);
     while (true)
         events_loop(server);
 }

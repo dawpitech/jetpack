@@ -19,7 +19,7 @@ CXXFLAGS	+=	-pedantic
 CXXFLAGS	+=	-iquote .
 CXXFLAGS	+=	-iquote common
 CXXFLAGS	+=	-MMD -MP
-CXXFLAGS	+=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -g3 -O1
+CXXFLAGS	+=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 CFLAGS		=	-std=gnu11
 CFLAGS		+=	-W

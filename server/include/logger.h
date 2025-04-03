@@ -11,13 +11,12 @@
     #include "server.h"
 
 typedef enum {
-    info,
-    warn,
-    err,
-} log_type;
+    INFO,
+    WARN,
+    ERR,
+} log_t;
 
-void logc(const client_t *client, log_type type,
-    const server_t *server, const char *fmt, ...);
-void logm(const log_type type, const server_t *server, const char *fmt, ...);
+void logc(const client_t *client, log_t type, const char *fmt, ...);
+void logm(log_t type, const server_t *server, const char *fmt, ...);
 
 #endif //LOGGER_H

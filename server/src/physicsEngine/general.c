@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2025
 ** jetpack
 ** File description:
-** Physic101.c
+** general.c
 */
 
 #include <stdio.h>
@@ -16,13 +16,13 @@ static void apply_gravity(const server_t *server, client_t *client)
     if (client->y > 360) {
         if (!client->on_the_floor) {
             client->on_the_floor = true;
-            update_player(server, client);
+            update_player(client);
         }
         return;
     }
     client->on_the_floor = false;
     client->y += 10;
-    update_player(server, client);
+    update_player(client);
 }
 
 // ReSharper disable once CppJoinDeclarationAndAssignment

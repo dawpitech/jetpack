@@ -36,6 +36,7 @@ typedef struct {
     float x;
     float y;
     bool on_the_floor;
+    bool debug;
 } client_t;
 
 typedef struct {
@@ -56,18 +57,18 @@ typedef struct {
 typedef struct {
     packet_type_t packet_type;
     void (*handler)(client_t *client, char buff[PACKET_BUFFER_SIZE]);
-} packet_handler_t;
+} pkt_handler_t;
 
 int init_server(server_t *server);
 void launch_server(server_t *server);
 
-void update_player(const server_t *server, const client_t *client);
+void update_player(const client_t *client);
 
 void hello_handler(client_t *client, char buff[PACKET_BUFFER_SIZE]);
 
-static const packet_handler_t HANDLERS[] = {
+static const pkt_handler_t HANDLERS[] = {
     {HELLO, hello_handler}
 };
-static const size_t HANDLERS_SIZE =
-    sizeof(HANDLERS) / sizeof(packet_handler_t);
+
+static const size_t HANDLERS_SIZE = sizeof(HANDLERS) / sizeof(pkt_handler_t);
 #endif //SERVER_H

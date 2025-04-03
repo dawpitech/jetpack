@@ -10,27 +10,26 @@
 
 #include "logger.h"
 
-static void print_log_type(const log_type type)
+static void print_log_type(const log_t type)
 {
     switch (type) {
-        case info:
+        case INFO:
             printf("[INFO] ");
             break;
-        case warn:
+        case WARN:
             printf("[WARN] ");
             break;
-        case err:
+        case ERR:
             printf("[ERR!] ");
             break;
     }
 }
 
-void logc(const client_t *client, const log_type type,
-    const server_t *server, const char *fmt, ...)
+void logc(const client_t *client, const log_t type, const char *fmt, ...)
 {
     va_list printf_args;
 
-    if (!server->debug)
+    if (!client->debug)
         return;
     va_start(printf_args, fmt);
     print_log_type(type);
@@ -40,7 +39,7 @@ void logc(const client_t *client, const log_type type,
     va_end(printf_args);
 }
 
-void logm(const log_type type, const server_t *server, const char *fmt, ...)
+void logm(const log_t type, const server_t *server, const char *fmt, ...)
 {
     va_list printf_args;
 

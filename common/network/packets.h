@@ -16,8 +16,8 @@
 
     #define PACKET_BUFFER_SIZE 1024
 
-typedef float   float32_t;
-typedef double  float64_t;
+typedef float float32_t;
+typedef double float64_t;
 
 typedef enum packet_type_e {
     INVALID,
