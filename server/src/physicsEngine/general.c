@@ -21,7 +21,8 @@ static void apply_gravity(const server_t *server, client_t *client)
         return;
     }
     client->on_the_floor = false;
-    client->y += 10;
+    client->y += 1; // TODO:
+    client->x += 1;
     update_player(client);
 }
 

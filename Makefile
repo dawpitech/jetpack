@@ -19,7 +19,7 @@ CXXFLAGS	+=	-pedantic
 CXXFLAGS	+=	-iquote .
 CXXFLAGS	+=	-iquote common
 CXXFLAGS	+=	-MMD -MP
-CXXFLAGS	+=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+CXXFLAGS	+=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -g3
 
 CFLAGS		=	-std=gnu11
 CFLAGS		+=	-W
@@ -48,7 +48,7 @@ SERVER_NAME	=	jetpack_server
 .DEFAULT_GOAL := all
 
 .PHONY: all
-all: $(CLIENT_NAME) $(SERVER_NAME)
+all: client server
 
 $(BDIR)/client/%.o: %.cpp
 	@ mkdir -p $(dir $@)
@@ -58,11 +58,11 @@ $(BDIR)/server/%.o: %.c
 	@ mkdir -p $(dir $@)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-$(CLIENT_NAME): $(CLIENT_OBJ)
-	$(CXX) $^ $(CXXFLAGS) -o $@
+client: $(CLIENT_OBJ)
+	$(CXX) $^ $(CXXFLAGS) -o $(CLIENT_NAME)
 
-$(SERVER_NAME): $(SERVER_OBJ)
-	$(CC) $^ $(CFLAGS) -o $@
+server: $(SERVER_OBJ)
+	$(CC) $^ $(CFLAGS) -o $(SERVER_NAME)
 
 .PHONY: clean
 clean:

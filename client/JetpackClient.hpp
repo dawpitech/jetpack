@@ -8,28 +8,25 @@
 #ifndef JETPACKCLIENT_HPP
     #define JETPACKCLIENT_HPP
 
-#include "game/Background.hpp"
-#include "game/Player.hpp"
+#include "graphical/GraphicClient.hpp"
+#include "network/NetworkClient.hpp"
+#include "utils/ClientData.hpp"
 
-#include <memory>
-#include <SFML/Graphics.hpp>
-
-#include "network/Client.hpp"
+#include <mutex>
 
 class JetpackClient
 {
     public:
-        JetpackClient(): _window(sf::VideoMode(800, 500), "Jetpack sadride") {}
+        JetpackClient(const std::string &ip, unsigned short port);
         ~JetpackClient() = default;
-        void initNetworkThread(const std::string& ip, unsigned short port);
-        void launch();
-        void stopNetworkThread();
+
+        void run();
 
     private:
-        std::unique_ptr<ServerConnection> _connection;
-        sf::RenderWindow _window;
-        Player _player;
-        Background _background;
+        std::mutex clientDataMutex;
+        jetpack::ClientData clientData;
+        jetpack::network::NetworkClient _network;
+        jetpack::graphical::GraphicalClient _graphical;
 };
 
 #endif //JETPACKCLIENT_HPP

@@ -5,16 +5,14 @@
 ** Main.cpp
 */
 
-#include <unistd.h>
-
 #include "JetpackClient.hpp"
+#include "utils/Logger.hpp"
+#include "graphical/GraphicClient.hpp"
 
 int main()
 {
-    JetpackClient client;
+    JetpackClient client{"127.0.0.1", 1234};
 
-    client.initNetworkThread("127.0.0.1", 1234);
-    client.launch();
-    client.stopNetworkThread();
+    client.run();
     return 0;
 }

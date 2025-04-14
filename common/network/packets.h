@@ -24,7 +24,13 @@ typedef enum packet_type_e {
     ACKNOWLEDGE,
     HELLO,
     PLAYER_UPDATE,
+    MAP_DESC,
+    INPUT,
 } packet_type_t;
+
+typedef enum player_input_e {
+    UP,
+} player_input_t;
 
 typedef struct packet_generic_s {
     packet_type_t type;
@@ -36,5 +42,15 @@ typedef struct packet_player_update_s {
     float32_t y;
     int on_the_floor;
 } packet_player_update_t;
+
+typedef struct packet_map_desc_s {
+    packet_type_t type;
+    char map[95][10];
+} packet_map_desc_t;
+
+typedef struct packet_input_s {
+    packet_type_t type;
+    player_input_t input;
+} packet_input_t;
 
 #endif //PACKETS_H

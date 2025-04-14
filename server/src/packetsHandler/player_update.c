@@ -16,3 +16,13 @@ void hello_handler(client_t *client, char buff[PACKET_BUFFER_SIZE])
     client->status = CONNECTED;
     write(client->network_fd, &packet, sizeof(packet));
 }
+
+void input_handler(client_t *client, char buff[PACKET_BUFFER_SIZE])
+{
+    const packet_input_t* packet_input = (packet_input_t *) buff;
+
+    if (packet_input->input != UP)
+        return;
+    client->y -= 10;
+    update_player(client);
+}

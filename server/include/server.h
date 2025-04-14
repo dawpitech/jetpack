@@ -65,9 +65,11 @@ void launch_server(server_t *server);
 void update_player(const client_t *client);
 
 void hello_handler(client_t *client, char buff[PACKET_BUFFER_SIZE]);
+void input_handler(client_t *client, char buff[PACKET_BUFFER_SIZE]);
 
 static const pkt_handler_t HANDLERS[] = {
-    {HELLO, hello_handler}
+    {HELLO, hello_handler},
+    {INPUT, input_handler},
 };
 
 static const size_t HANDLERS_SIZE = sizeof(HANDLERS) / sizeof(pkt_handler_t);

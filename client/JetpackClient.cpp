@@ -7,31 +7,18 @@
 
 #include "JetpackClient.hpp"
 
-void JetpackClient::initNetworkThread(const std::string& ip, unsigned short port)
+#include <iostream>
+
+JetpackClient::JetpackClient(const std::string &ip, const unsigned short port):
+    _network(ip, port)
 {
-    this->_connection = std::make_unique<ServerConnection>(ip, port);
-    this->_connection->run(this->_player);
+    this->_network.run(this->clientDataMutex, this->clientData);
 }
 
-void JetpackClient::launch()
+void JetpackClient::run()
 {
-    this->_window.setFramerateLimit(30);
-    while (true) {
-        this->_window.clear();
-        //printf("render\n");
-        this->_background.render(this->_window);
-        this->_player.render(this->_window);
-        this->_window.display();
-
-        sf::Event event{};
-        while (this->_window.pollEvent(event))
-            if (event.type == sf::Event::Closed) {
-                _window.close();
-                return;
-            }
+    while (this->clientData.running) {
+        this->_graphical.render();
+        this->_graphical.updateDataCache(this->clientDataMutex, this->clientData);
     }
-}
-
-void JetpackClient::stopNetworkThread() {
-    this->_connection->stop();
 }
