@@ -80,7 +80,7 @@ static void compute_incoming_packet(server_t *server, client_t *client)
     for (size_t i = 0; i < HANDLERS_SIZE; i++) {
         if (HANDLERS[i].packet_type != gpkt->type)
             continue;
-        HANDLERS[i].handler(client, buff);
+        HANDLERS[i].handler(client, server, buff);
         found = true;
     }
     if (!found)

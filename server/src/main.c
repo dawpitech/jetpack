@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "main.h"
 #include "server.h"
@@ -27,9 +28,56 @@ static void parse_port(const char arg[], server_t *server)
     }
 }
 
+static void parser_exit_err(FILE *file, char *format, ...)
+{
+    va_list args;
+
+    if (file != NULL)
+        fclose(file);
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    exit(84);
+}
+
+static void parser_parse_line(char *line, FILE *file, server_t *server,
+    int *row)
+{
+    size_t len = strlen(line);
+
+    if ((len == MAP_COLS && line[len - 1] != '\n') ||
+        (len == MAP_COLS + 1 && line[len - 1] == '\n')) {
+        if (line[len - 1] == '\n') {
+            line[len - 1] = '\0';
+            len--;
+        }
+        if (len != MAP_COLS)
+            parser_exit_err(file, "jetpack_server: bad line len, row %d\n",
+                *row);
+        memcpy(server->map[*row], line, MAP_COLS);
+        (*row)++;
+        if (*row > MAP_ROWS)
+            parser_exit_err(file, "jetpack_server: too many rows\n");
+    } else {
+        parser_exit_err(file, "jetpack_server: bat format, row %d\n", *row);
+    }
+}
+
 static void parse_map_path(const char arg[], server_t *server)
 {
+    FILE *file = fopen(arg, "r");
+    char line[MAP_COLS + 2] = {0};
+    int row = 0;
+
+    if (file == NULL)
+        parser_exit_err(file, "jetpack_server: could not open map\n");
     strncpy(server->map_path, arg, PATH_MAX);
+    while (fgets(line, sizeof(line), file))
+        parser_parse_line(line, file, server, &row);
+    if (row != MAP_ROWS)
+        parser_exit_err(file, "jetpack_server: map has %d rows, expected %d\n",
+            MAP_ROWS, row);
+    fclose(file);
 }
 
 static int parse_args(const int argc, const char *argv[],
