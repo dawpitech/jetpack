@@ -1,4 +1,7 @@
 .build
+.cache
+*.log
+*.json
 jetpack_client
 jetpack_server
 *.o

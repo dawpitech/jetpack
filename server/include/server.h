@@ -38,6 +38,7 @@ typedef struct {
     float x;
     float y;
     bool on_the_floor;
+    bool going_up;
     bool debug;
 } client_t;
 

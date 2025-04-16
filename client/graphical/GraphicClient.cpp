@@ -7,7 +7,9 @@
 
 #include "GraphicClient.hpp"
 
+#include <SFML/Window/Event.hpp>
 #include <iostream>
+#include "network/packets.h"
 
 jetpack::graphical::GraphicalClient::GraphicalClient()
     : _window(sf::VideoMode(800, 500), "Jetpack sadride"), _player()
@@ -17,6 +19,7 @@ jetpack::graphical::GraphicalClient::GraphicalClient()
 
 void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, ClientData &clientData)
 {
+    static bool up = false;
     std::lock_guard lock(mtx);
     this->_player.setPos(0, clientData.playerPosition.y);
     this->_background.setPos(-clientData.playerPosition.x, 0);
@@ -27,12 +30,20 @@ void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, Clien
     {
         if (event.type == sf::Event::Closed)
             clientData.running = false;
-        if (event.type == sf::Event::KeyPressed)
-            if (event.key.code == sf::Keyboard::Space) {
+        if (event.type == sf::Event::KeyPressed) {
+            if (event.key.code == sf::Keyboard::Space && !up) {
                 clientData.input_queue.push(UP);
-                std::cout << "INGEST SPACE INPUT" << std::endl;
+                std::cout << "INGEST SPACE UP INPUT" << std::endl;
+                up = true;
             }
-
+        }
+        if (event.type == sf::Event::KeyReleased) {
+            if (event.key.code == sf::Keyboard::Space && up) {
+                clientData.input_queue.push(NONE);
+                std::cout << "INGEST SPACE RELEASE INPUT" << std::endl;
+                up = false;
+            }
+        }
     }
 }
 

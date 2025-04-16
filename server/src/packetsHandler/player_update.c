@@ -8,6 +8,7 @@
 #include "network/packets.h"
 #include "server.h"
 
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -30,8 +31,10 @@ void input_handler(client_t *client, server_t *server,
     const packet_input_t *packet_input = (packet_input_t *)buff;
 
     (void)server;
-    if (packet_input->input != UP)
-        return;
-    client->y -= 10;
+    if (packet_input->input == UP) {
+        client->going_up = true;
+    } else if (packet_input->input == NONE) {
+        client->going_up = false;
+    }
     update_player(client);
 }

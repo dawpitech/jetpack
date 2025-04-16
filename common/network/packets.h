@@ -30,6 +30,7 @@ typedef enum packet_type_e {
 
 typedef enum player_input_e {
     UP,
+    NONE
 } player_input_t;
 
 typedef struct packet_generic_s {

@@ -13,15 +13,23 @@
 
 static void apply_gravity(const server_t *server, client_t *client)
 {
-    if (client->y > 360) {
-        if (!client->on_the_floor) {
-            client->on_the_floor = true;
-            update_player(client);
-        }
-        return;
+    if (client->going_up) {
+        if (client->y - 1 < 100)
+            client->y = 100 - client->y;
+        if (client->y - 1 >= 100)
+            client->y -= 1;
     }
-    client->on_the_floor = false;
-    client->y += 1; // TODO:
+    if (client->y < 100)
+        client->y = 100;
+    if (client->y < 361)
+        client->on_the_floor = false;
+    if (client->y > 361) {
+        client->y = 361;
+        client->on_the_floor = true;
+    }
+    if (!client->on_the_floor && !client->going_up) {
+        client->y += 1;
+    }
     client->x += 1;
     update_player(client);
 }

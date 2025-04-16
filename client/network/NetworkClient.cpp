@@ -51,9 +51,10 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
         }
         while (!clientData.input_queue.empty())
         {
+            player_input_t pi = clientData.input_queue.front();
             packet_input_t packet = {
                 .type = INPUT,
-                .input = UP,
+                .input = pi,
             };
 
             write(this->network_fd, &packet, sizeof(packet_input_t));
