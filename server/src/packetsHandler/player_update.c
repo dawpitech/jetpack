@@ -11,18 +11,17 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 void hello_handler(client_t *client, server_t *server,
     char buff[PACKET_BUFFER_SIZE])
 {
     const packet_generic_t packet = {.type = ACKNOWLEDGE};
-    const packet_map_desc_t map_p = {.type = MAP_DESC};
 
     (void)buff;
-    memcpy((void *)map_p.map, server->map, sizeof(server->map));
     client->status = CONNECTED;
     write(client->network_fd, &packet, sizeof(packet));
-    write(client->network_fd, &map_p, sizeof(map_p));
+    send_map(client, server);
 }
 
 void input_handler(client_t *client, server_t *server,
@@ -37,4 +36,12 @@ void input_handler(client_t *client, server_t *server,
         client->going_up = false;
     }
     update_player(client);
+}
+
+void send_player_stats(client_t *client)
+{
+    const packet_player_stats_t packet = {.type = PLAYER_STATS,
+        .dead = client->player_dead, .score = client->player_score};
+
+    write(client->network_fd, &packet, sizeof(packet));
 }

@@ -14,11 +14,9 @@
     #include <netinet/ip.h>
 
     #include "network/packets.h"
+    #include "../common/network/map.h"
 
     #define SERVER_MAX_CLIENTS 4
-    #define MAP_ROWS 10
-    #define MAP_COLS 95
-
 
 enum connection_status {
     UNKNOWN,
@@ -37,8 +35,11 @@ typedef struct {
     struct timespec physic_clock;
     float x;
     float y;
+    int player_score;
+    bool player_dead;
     bool on_the_floor;
     bool going_up;
+    bool map_sent;
     bool debug;
 } client_t;
 
@@ -54,7 +55,7 @@ typedef struct {
     client_t clients[SERVER_MAX_CLIENTS];
     size_t connected_client_nb;
     char map_path[PATH_MAX + 1];
-    char map[95][10];
+    char map[MAP_ROWS][MAP_COLS];
     bool debug;
 } server_t;
 
@@ -68,6 +69,8 @@ int init_server(server_t *server);
 void launch_server(server_t *server);
 
 void update_player(const client_t *client);
+void send_map(client_t *client, server_t *server);
+void send_player_stats(client_t *client);
 
 void hello_handler(client_t *client, server_t *server,
     char buff[PACKET_BUFFER_SIZE]);

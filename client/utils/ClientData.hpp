@@ -7,8 +7,11 @@
 
 #pragma once
 
+#include <array>
+#include <atomic>
 #include <queue>
 
+#include "network/map.h"
 #include "network/packets.h"
 
 namespace jetpack
@@ -31,7 +34,10 @@ namespace jetpack
             bool connectedToServer = false;
             bool running = true;
             Vector2<float> playerPosition{0.f, 200.f};
+            std::atomic_bool isDead = false;
+            std::atomic_int score = 0;      
             bool playerOnFloor = false;
+            std::array<std::array<std::atomic_char, MAP_COLS>, MAP_ROWS> map;
             std::queue<player_input_t> input_queue{};
     };
 }

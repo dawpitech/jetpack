@@ -8,6 +8,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include "network/map.h"
+#include <SFML/Graphics/Texture.hpp>
+#include <array>
+#include <vector>
 
 namespace jetpack::graphical
 {
@@ -19,13 +26,27 @@ namespace jetpack::graphical
 
             void render(sf::RenderWindow&);
             void setPos(float x, float y);
+            void setIsDead(bool dead);
+            void setScore(int _score);
+            void setRealXPos(int pos);
+            void setMap(std::array<std::array<char, MAP_COLS>, MAP_ROWS> _map);
             void setOnFloor(bool);
 
         private:
+            bool isDead;
+            int score;
+            float realXPos;
+            std::array<std::array<char, MAP_COLS>, MAP_ROWS> map;
             sf::Texture _texture;
             sf::Sprite _sprite;
+            sf::Text _score_text;
             sf::Clock _asset_animation_clock;
+            sf::Font _font;
+            sf::Texture _zapper_tex;
+            sf::Texture _coin_tex;
             std::size_t _current_asset_tile;
+            std::size_t _coins_current_asset_tile;
+            std::size_t _zapper_current_asset_tile;
             bool _onFloor;
     };
 };

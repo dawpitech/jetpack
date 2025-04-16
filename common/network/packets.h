@@ -8,10 +8,13 @@
 #ifndef PACKETS_H
     #define PACKETS_H
 
+    #include "network/map.h"
     #ifdef __cplusplus
         #include <cstdint>
+        #include <cstddef>
     #else
         #include <stdint.h>
+        #include <stddef.h>
     #endif
 
     #define PACKET_BUFFER_SIZE 1024
@@ -26,6 +29,7 @@ typedef enum packet_type_e {
     PLAYER_UPDATE,
     MAP_DESC,
     INPUT,
+    PLAYER_STATS
 } packet_type_t;
 
 typedef enum player_input_e {
@@ -46,12 +50,28 @@ typedef struct packet_player_update_s {
 
 typedef struct packet_map_desc_s {
     packet_type_t type;
-    char map[95][10];
+    char map[MAP_ROWS][MAP_COLS];
 } packet_map_desc_t;
 
 typedef struct packet_input_s {
     packet_type_t type;
     player_input_t input;
 } packet_input_t;
+
+typedef struct packet_player_stats_s {
+    packet_type_t type;
+    int dead;
+    int score;
+} packet_player_stats_t;
+
+static const size_t PACKET_SIZES[] = {
+    0,
+    sizeof(packet_generic_t) - sizeof(packet_type_t),
+    sizeof(packet_generic_t) - sizeof(packet_type_t),
+    sizeof(packet_player_update_t) - sizeof(packet_type_t),
+    sizeof(packet_map_desc_t) - sizeof(packet_type_t),
+    sizeof(packet_input_t) - sizeof(packet_type_t),
+    sizeof(packet_player_stats_t) - sizeof(packet_type_t)
+};
 
 #endif //PACKETS_H

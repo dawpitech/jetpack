@@ -63,10 +63,12 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
         }
         if (!to_read)
             continue;
-        const long bytes_r = read(this->network_fd, buff, PACKET_BUFFER_SIZE);
+        long bytes_r = read(this->network_fd, buff, sizeof(packet_type_t));
         if (bytes_r == 0 || buff[0] == '\0')
             return;
-        switch (reinterpret_cast<packet_generic_t*>(&buff)->type)
+        auto packet_type = reinterpret_cast<packet_type_t*>(&buff);
+        bytes_r = read(this->network_fd, buff + sizeof(*packet_type), PACKET_SIZES[*packet_type]);
+        switch (*packet_type)
         {
             case PLAYER_UPDATE:
             {
@@ -74,6 +76,25 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
                 clientData.playerPosition.x = packet->x;
                 clientData.playerPosition.y = packet->y;
                 clientData.playerOnFloor = packet->on_the_floor;
+                break;
+            }
+            case PLAYER_STATS:
+            {
+                const auto packet = reinterpret_cast<packet_player_stats_t*>(&buff);
+
+                clientData.score = packet->score;
+                clientData.isDead = packet->dead;
+                break;
+            }
+            case MAP_DESC:
+            {
+                const auto packet = reinterpret_cast<packet_map_desc_t*>(&buff);
+
+                for (int y = 0; y < MAP_ROWS; ++y) {
+                    for (int x = 0; x < MAP_COLS; ++x) {
+                        clientData.map[y][x].store(packet->map[y][x], std::memory_order_relaxed);
+                    }
+                }
                 break;
             }
             default:

@@ -20,9 +20,21 @@ jetpack::graphical::GraphicalClient::GraphicalClient()
 void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, ClientData &clientData)
 {
     static bool up = false;
+    std::array<std::array<char, MAP_COLS>, MAP_ROWS> rawMap;
     std::lock_guard lock(mtx);
-    this->_player.setPos(0, clientData.playerPosition.y);
-    this->_background.setPos(-clientData.playerPosition.x, 0);
+
+    this->_player.setIsDead(clientData.isDead);
+    for (int y = 0; y < MAP_ROWS; ++y) {
+        for (int x = 0; x < MAP_COLS; ++x) {
+            rawMap[y][x] = clientData.map[y][x].load(std::memory_order_relaxed);
+        }
+    }
+    this->_player.setMap(rawMap);
+
+    this->_player.setScore(clientData.score);
+    this->_player.setPos(0, clientData.playerPosition.y + 30);
+    this->_background.setPos((-clientData.playerPosition.x) + 43, 0);
+    this->_player.setRealXPos(clientData.playerPosition.x);
     this->_player.setOnFloor(clientData.playerOnFloor);
 
     sf::Event event{};

@@ -10,5 +10,5 @@
 
     #include "server.h"
 
-void compute_physics(const server_t *server, client_t *client);
+void compute_physics(server_t *server, client_t *client);
 #endif //PHYSICS_H
