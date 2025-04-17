@@ -39,8 +39,8 @@ typedef struct {
     bool player_dead;
     bool on_the_floor;
     bool going_up;
-    bool map_sent;
     bool debug;
+    bool game_ended;
     char map[MAP_ROWS][MAP_COLS];
 } client_t;
 
@@ -72,6 +72,8 @@ void launch_server(server_t *server);
 void update_player(const client_t *client);
 void send_map(client_t *client);
 void send_player_stats(client_t *client);
+void send_game_ended(server_t *server, size_t winner_id);
+void send_game_started(server_t *server);
 
 void hello_handler(client_t *client, server_t *server,
     char buff[PACKET_BUFFER_SIZE]);

@@ -8,6 +8,10 @@
 #include "network/packets.h"
 #include "server.h"
 
+#include <signal.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -46,4 +50,49 @@ void send_player_stats(client_t *client)
         .dead = client->player_dead, .score = client->player_score};
 
     write(client->network_fd, &packet, sizeof(packet));
+}
+
+static void send_game_ended_internal(server_t *server,
+    packet_game_ended_t *packet, size_t best_player)
+{
+    for (size_t j = 0; j < server->connected_client_nb; j++) {
+        server->clients[j].game_ended = true;
+        packet[j].winner_id = best_player;
+        if (best_player == j)
+            packet[j].client_won = 1;
+        write(server->clients[j].network_fd, &(packet[j]), sizeof(packet[j]));
+    }
+}
+
+void send_game_ended(server_t *server, size_t winner_id)
+{
+    packet_game_ended_t packet[server->connected_client_nb];
+    int best_score = -1;
+    size_t best_player = 0;
+
+    for (size_t i = 0; i < server->connected_client_nb; i++) {
+        packet[i].type = GAME_ENDED;
+        if (server->clients[i].player_dead) {
+            packet[i].client_won = 0;
+            continue;
+        }
+        if (server->clients[i].player_score > best_score) {
+            best_player = i;
+            best_score = server->clients[i].player_score;
+        }
+    }
+    if (winner_id != SIZE_MAX)
+        best_player = winner_id;
+    send_game_ended_internal(server, packet, best_player);
+}
+
+void send_game_started(server_t *server)
+{
+    const packet_generic_t packet = {.type = GAME_STARTED};
+
+    for (size_t i = 0; i < server->connected_client_nb; i++) {
+        if (server->clients[i].game_ended)
+            continue;
+        write(server->clients[i].network_fd, &packet, sizeof(packet));
+    }
 }

@@ -5,6 +5,7 @@
 ** Client.cpp
 */
 
+#include <ostream>
 #include <poll.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -97,6 +98,20 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
                 }
                 break;
             }
+            case GAME_ENDED:
+            {
+                const auto packet = reinterpret_cast<packet_game_ended_t*>(&buff);
+
+		clientData.won = packet->client_won == 0 ? false : true;
+		clientData.winner_id = packet->winner_id;
+		clientData.gameEnded = true;
+                break;
+            }
+	    case GAME_STARTED:
+	    {
+		clientData.gameStarted = true;
+                break;
+	    }
             default:
                 break;
         }

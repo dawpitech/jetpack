@@ -21,6 +21,8 @@ jetpack::graphical::Player::Player(): _current_asset_tile(0), _coins_current_ass
     this->isDead = false;
     this->_font.loadFromFile("assets/comicsans.ttf");
     this->_score_text.setFont(this->_font);
+    this->_generic_text.setFont(this->_font);
+    this->_generic_text.setCharacterSize(20);
     this->_score_text.setCharacterSize(20);
     this->_sprite.setScale(0.3f, 0.3f);
     this->score = 0;
@@ -29,6 +31,7 @@ jetpack::graphical::Player::Player(): _current_asset_tile(0), _coins_current_ass
 void jetpack::graphical::Player::render(sf::RenderWindow& window) {
     int asset_row = this->_onFloor ? 0 : 1;
     int tile_size = 40;
+    int player_x_offset = 100;
     if (this->isDead)
         asset_row = 3;
     auto pos = this->_sprite.getPosition();
@@ -56,7 +59,6 @@ void jetpack::graphical::Player::render(sf::RenderWindow& window) {
         throw std::exception();
     this->_sprite.setTexture(this->_texture);
     this->_sprite.setPosition(pos);
-    window.draw(this->_sprite);
 
     for (int y = 0; y < MAP_ROWS; ++y) {
         for (int x = 0; x < MAP_COLS; ++x) {
@@ -64,7 +66,8 @@ void jetpack::graphical::Player::render(sf::RenderWindow& window) {
                 sf::Sprite coin_;
                 coin_.setScale(0.15f, 0.15f);
                 coin_.setTexture(this->_coin_tex);
-                coin_.setPosition(static_cast<float>((x * tile_size) - (this->realXPos)),
+                //skibidi magic
+                coin_.setPosition(static_cast<float>(((x * tile_size) - (this->realXPos)) + (player_x_offset - 2)),
                                   static_cast<float>((y + 1.5f) * tile_size));
                 window.draw(coin_);
             }
@@ -72,7 +75,7 @@ void jetpack::graphical::Player::render(sf::RenderWindow& window) {
                 sf::Sprite zapper_;
                 zapper_.setScale(0.35f, 0.35f);
                 zapper_.setTexture(this->_zapper_tex);
-                zapper_.setPosition(static_cast<float>((x * tile_size) - this->realXPos),
+                zapper_.setPosition(static_cast<float>(((x * tile_size) - this->realXPos) + player_x_offset),
                                     static_cast<float>((y + 1.5f) * tile_size));
                 window.draw(zapper_);
             }
@@ -80,7 +83,24 @@ void jetpack::graphical::Player::render(sf::RenderWindow& window) {
     }
 
     this->_score_text.setString("Score: " + std::to_string(this->score));
-    window.draw(this->_score_text);
+
+    if (!this->gameStarted) {
+        this->_generic_text.setString("Waiting for other players...");
+        this->_generic_text.setPosition({(800.f / 2) - 130.f, 500.f / 2});
+        window.draw(this->_generic_text);
+    } else if (this->gameEnded) {
+        this->_generic_text.setString(this->won ? "You won !" : "You lost :/");
+        this->_generic_text.setPosition({(800.f / 2) - 50.f, 500.f / 2});
+        window.draw(this->_generic_text);
+        if (!this->won) {
+            this->_generic_text.setString("Player " + std::to_string(this->winnerId + 1) + " won.");
+            this->_generic_text.setPosition({(800.f / 2) - 60.f, (500.f / 2) + 30.f});
+            window.draw(this->_generic_text);
+        }
+    } else {
+        window.draw(this->_score_text);
+        window.draw(this->_sprite);
+    }
 
     if (this->_asset_animation_clock.getElapsedTime() >= sf::milliseconds(80)) {
         this->_current_asset_tile = (this->_current_asset_tile + 1) % 4;
@@ -113,4 +133,20 @@ void jetpack::graphical::Player::setMap(std::array<std::array<char, MAP_COLS>, M
 
 void jetpack::graphical::Player::setRealXPos(const int _pos) {
     this->realXPos = _pos;
+}
+
+void jetpack::graphical::Player::setGameEnded(const bool ended) {
+    this->gameEnded = ended;
+}
+
+void jetpack::graphical::Player::setGameStarted(const bool started) {
+    this->gameStarted = started;
+}
+
+void jetpack::graphical::Player::setWon(const bool _won) {
+    this->won = _won;
+}
+
+void jetpack::graphical::Player::setWinnerId(const int winner_id) {
+    this->winnerId = winner_id;
 }

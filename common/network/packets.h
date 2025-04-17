@@ -29,7 +29,9 @@ typedef enum packet_type_e {
     PLAYER_UPDATE,
     MAP_DESC,
     INPUT,
-    PLAYER_STATS
+    PLAYER_STATS,
+    GAME_ENDED,
+    GAME_STARTED
 } packet_type_t;
 
 typedef enum player_input_e {
@@ -64,6 +66,12 @@ typedef struct packet_player_stats_s {
     int score;
 } packet_player_stats_t;
 
+typedef struct packet_game_ended_s {
+    packet_type_t type;
+    int winner_id;
+    int client_won;
+} packet_game_ended_t;
+
 static const size_t PACKET_SIZES[] = {
     0,
     sizeof(packet_generic_t) - sizeof(packet_type_t),
@@ -71,7 +79,9 @@ static const size_t PACKET_SIZES[] = {
     sizeof(packet_player_update_t) - sizeof(packet_type_t),
     sizeof(packet_map_desc_t) - sizeof(packet_type_t),
     sizeof(packet_input_t) - sizeof(packet_type_t),
-    sizeof(packet_player_stats_t) - sizeof(packet_type_t)
+    sizeof(packet_player_stats_t) - sizeof(packet_type_t),
+    sizeof(packet_game_ended_t) - sizeof(packet_type_t),
+    sizeof(packet_generic_t) - sizeof(packet_type_t)
 };
 
 #endif //PACKETS_H

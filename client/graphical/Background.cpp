@@ -8,7 +8,7 @@
 #include "Background.hpp"
 
 jetpack::graphical::Background::Background() {
-    this->_sprite.setScale(1.75, 1.75);
+    this->_sprite.setScale(2.5, 1.75);
     this->_sprite.setPosition(0, -50);
 }
 

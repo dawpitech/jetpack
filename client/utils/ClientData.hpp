@@ -33,10 +33,14 @@ namespace jetpack
 
             bool connectedToServer = false;
             bool running = true;
+	    bool won = false;
+	    int winner_id = -1;
             Vector2<float> playerPosition{0.f, 200.f};
             std::atomic_bool isDead = false;
             std::atomic_int score = 0;      
             bool playerOnFloor = false;
+	    bool gameStarted = false;
+	    bool gameEnded = false;
             std::array<std::array<std::atomic_char, MAP_COLS>, MAP_ROWS> map;
             std::queue<player_input_t> input_queue{};
     };

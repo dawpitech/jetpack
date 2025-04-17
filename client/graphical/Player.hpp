@@ -29,17 +29,26 @@ namespace jetpack::graphical
             void setIsDead(bool dead);
             void setScore(int _score);
             void setRealXPos(int pos);
+	    void setGameStarted(bool started);
+	    void setGameEnded(bool ended);
+	    void setWon(bool _won);
+	    void setWinnerId(int winner_id);
             void setMap(std::array<std::array<char, MAP_COLS>, MAP_ROWS> _map);
             void setOnFloor(bool);
 
         private:
             bool isDead;
+	    bool gameStarted;
+	    bool gameEnded;
+	    bool won;
+	    int winnerId;
             int score;
             float realXPos;
             std::array<std::array<char, MAP_COLS>, MAP_ROWS> map;
             sf::Texture _texture;
             sf::Sprite _sprite;
             sf::Text _score_text;
+            sf::Text _generic_text;
             sf::Clock _asset_animation_clock;
             sf::Font _font;
             sf::Texture _zapper_tex;
