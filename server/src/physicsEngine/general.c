@@ -36,20 +36,20 @@ static void apply_gravity(const server_t *server, client_t *client)
     update_player(client);
 }
 
-static void check_collide_map(server_t *server, client_t *client)
+static void check_collide_map(client_t *client)
 {
     int tile_size = 40;
     int clamped_y = (int)(client->y / tile_size);
     int clamped_x = (int)(client->x / tile_size);
 
-    if (server->map[clamped_y][clamped_x] == '_')
+    if (client->map[clamped_y][clamped_x] == '_')
         return;
-    if (server->map[clamped_y][clamped_x] == 'e')
+    if (client->map[clamped_y][clamped_x] == 'e')
         client->player_dead = true;
-    if (server->map[clamped_y][clamped_x] == 'c') {
+    if (client->map[clamped_y][clamped_x] == 'c') {
         client->player_score++;
-        server->map[clamped_y][clamped_x] = '_';
-        send_map(client, server);
+        client->map[clamped_y][clamped_x] = '_';
+        send_map(client);
     }
     send_player_stats(client);
 }
@@ -66,6 +66,6 @@ void compute_physics(server_t *server, client_t *client)
     if (diff < 50 || client->player_dead)
         return;
     apply_gravity(server, client);
-    check_collide_map(server, client);
+    check_collide_map(client);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &client->physic_clock);
 }

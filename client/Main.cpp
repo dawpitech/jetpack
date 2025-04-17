@@ -6,13 +6,18 @@
 */
 
 #include "JetpackClient.hpp"
+#include "client/Arguments.hpp"
 #include "utils/Logger.hpp"
 #include "graphical/GraphicClient.hpp"
 
-int main()
+int main(const int argc, const char **argv)
 {
-    JetpackClient client{"127.0.0.1", 1234};
+    Arguments arg_parser;
 
+    if (!arg_parser.parseArguments(argc, argv))
+        return 84;
+
+    JetpackClient client{arg_parser.getIp(), arg_parser.getPort()};
     client.run();
     return 0;
 }

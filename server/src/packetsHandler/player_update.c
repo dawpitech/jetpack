@@ -21,7 +21,9 @@ void hello_handler(client_t *client, server_t *server,
     (void)buff;
     client->status = CONNECTED;
     write(client->network_fd, &packet, sizeof(packet));
-    send_map(client, server);
+    for (int y = 0; y < MAP_ROWS; ++y)
+        memcpy(client->map[y], server->map[y], MAP_COLS);
+    send_map(client);
 }
 
 void input_handler(client_t *client, server_t *server,

@@ -41,6 +41,7 @@ typedef struct {
     bool going_up;
     bool map_sent;
     bool debug;
+    char map[MAP_ROWS][MAP_COLS];
 } client_t;
 
 typedef struct {
@@ -69,7 +70,7 @@ int init_server(server_t *server);
 void launch_server(server_t *server);
 
 void update_player(const client_t *client);
-void send_map(client_t *client, server_t *server);
+void send_map(client_t *client);
 void send_player_stats(client_t *client);
 
 void hello_handler(client_t *client, server_t *server,

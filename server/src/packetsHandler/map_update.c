@@ -11,11 +11,11 @@
 #include <stdlib.h>
 #include "server.h"
 
-void send_map(client_t *client, server_t *server)
+void send_map(client_t *client)
 {
     packet_map_desc_t map_p = {.type = MAP_DESC};
 
     for (int y = 0; y < MAP_ROWS; ++y)
-        memcpy(map_p.map[y], server->map[y], MAP_COLS);
+        memcpy(map_p.map[y], client->map[y], MAP_COLS);
     write(client->network_fd, &map_p, sizeof(map_p));
 }
