@@ -28,6 +28,18 @@ static void parse_port(const char arg[], server_t *server)
     }
 }
 
+static void parse_playercount(const char arg[], server_t *server)
+{
+    server->num_players = strtoul(arg, NULL, 10);
+    for (size_t i = 0; i < strlen(arg); i++)
+        if (!isdigit(arg[i]))
+            server->num_players = 0;
+    if (server->num_players == 0 || errno != 0) {
+        fprintf(stderr, "jetpack_server: invalid player number\n");
+        server->num_players = 2;
+    }
+}
+
 static void parser_exit_err(FILE *file, char *format, ...)
 {
     va_list args;
@@ -96,6 +108,8 @@ static int parse_args(const int argc, const char *argv[],
             parse_map_path(argv[i + 1], server);
         if (strcmp(argv[i], "-d") == 0)
             server->debug = true;
+        if (strcmp(argv[i], "-n") == 0 && i + 1 < argc)
+            parse_playercount(argv[i + 1], server);
     }
     if (server->port == 0 || server->map_path[0] == '\0')
         return fprintf(stderr,
@@ -103,11 +117,21 @@ static int parse_args(const int argc, const char *argv[],
     return server->port == 1;
 }
 
+static int show_help(void)
+{
+    printf("usage: ./jetpack_server -p port -m map_path");
+    printf(" [-n number of players (default 2)] [-d (enable debug mode)]\n");
+    return 0;
+}
+
 int main(const int argc, const char *argv[])
 {
     static server_t server = {0};
 
     setenv("LC_ALL", "C", 1);
+    if (argc == 2 && strcmp(argv[1], "-h") == 0)
+        return show_help();
+    server.num_players = 2;
     if (parse_args(argc, argv, &server) != 0)
         return EXIT_FAILURE_TECH;
     if (init_server(&server) != 0)

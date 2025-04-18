@@ -92,7 +92,7 @@ void compute_physics(server_t *server, client_t *client)
     struct timespec now;
     int diff;
 
-    if (server->connected_client_nb < 2) {
+    if (server->connected_client_nb < server->num_players) {
         game_started = 1;
         return;
     }

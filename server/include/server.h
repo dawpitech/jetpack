@@ -52,6 +52,7 @@ typedef struct {
 
 typedef struct {
     int server_fd;
+    size_t num_players;
     unsigned short port;
     client_t clients[SERVER_MAX_CLIENTS];
     size_t connected_client_nb;
