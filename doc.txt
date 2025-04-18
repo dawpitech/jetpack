@@ -1,1 +1,401 @@
-TODO
+Jetpack Corp
+18 April 2025
+Category: Informational
+
+
+               Jetpack Game Protocol Specification
+
+Status of This Memo
+
+   This document is not an Internet Standards Track specification; it is
+   published for informational purposes.
+
+   This document is a product of independent work. It does not 
+   represent the consensus of any standards body.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors. All rights reserved.
+
+Abstract
+
+   This document describes the protocol used by the Jetpack game, a
+   two-player online game. It specifies the binary packet format for
+   communication between clients and servers, as well as the map format
+   used by the game.
+
+Table of Contents
+
+   1. Introduction .................................................. 2
+   2. Terminology ................................................... 2
+   3. Protocol Overview ............................................. 3
+   4. Data Types .................................................... 3
+   5. Packet Structure .............................................. 4
+      5.1. Packet Types ............................................. 4
+      5.2. Packet Formats ........................................... 5
+   6. Protocol Flow ................................................. 8
+      6.1. Client to Server Communication ........................... 8
+      6.2. Server to Client Communication ........................... 9
+   7. Map Format ................................................... 10
+      7.1. Map Dimensions .......................................... 10
+      7.2. Map Elements ............................................ 10
+      7.3. Map Example ............................................. 11
+   8. Security Considerations ...................................... 12
+   9. References ................................................... 12
+   Appendix A. Acknowledgements .................................... 12
+
+
+1. Introduction
+
+   The Jetpack game is a two-player online game where players control
+   characters with jetpacks. The client is responsible for rendering the
+   game and handling user input, while the server manages game state and
+   broadcasts updates to clients.
+
+   This document specifies the protocol used for communication between
+   the Jetpack game client and server, as well as the format of game
+   maps. It is intended to be used as a reference for implementers
+   developing compatible clients and servers.
+
+2. Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
+
+   The following terms are used throughout this document:
+
+   Client:
+      The software component that renders the game and handles user
+      input. Each player controls one client.
+
+   Server:
+      The software component that manages game state and broadcasts
+      updates to all connected clients.
+
+   Packet:
+      A unit of data transmitted between client and server.
+
+   Map:
+      The game environment represented as a grid of tiles.
+
+   Zapper:
+      An obstacle in the game that causes players to lose when touched.
+
+   Coin:
+      A collectible item in the game that increases the player's score.
+
+3. Protocol Overview
+
+   The Jetpack game uses a client-server architecture with binary
+   packets for communication. The client is primarily responsible for:
+
+   1. Rendering the game state
+   2. Capturing user input (specifically spacebar presses and releases)
+   3. Sending input events to the server
+
+   The server is responsible for:
+
+   1. Managing the game state
+   2. Processing player input
+   3. Detecting collisions and updating player states
+   4. Broadcasting state updates to all clients
+
+   Communication between client and server is asymmetric:
+
+   - Client to server: The client sends INPUT packets when the spacebar
+     is pressed or released.
+
+   - Server to client: The server sends various packet types including
+     player positions, map description, player stats, and game events.
+
+4. Data Types
+
+   This specification uses the following data types:
+
+   uint8_t:
+      An 8-bit unsigned integer.
+
+   int32_t:
+      A 32-bit signed integer.
+
+   float32_t:
+      A 32-bit IEEE 754 floating-point number.
+
+   char:
+      An 8-bit character, typically in ASCII encoding.
+
+   enum:
+      An enumerated type represented as an integer.
+
+   All multi-byte integer and floating-point values MUST be transmitted
+   in network byte order (big-endian).
+
+5. Packet Structure
+
+   All packets begin with a packet type field, followed by type-specific
+   data. The packet type is encoded as a uint8_t value.
+
+5.1. Packet Types
+
+   The following packet types are defined:
+
+   +-------+----------------+----------------------------------------+
+   | Value | Name           | Description                            |
+   +-------+----------------+----------------------------------------+
+   | 0     | INVALID        | Invalid packet, should be ignored      |
+   | 1     | ACKNOWLEDGE    | Acknowledgement of the HELLO packet    |
+   | 2     | HELLO          | Initial handshake packet               |
+   | 3     | PLAYER_UPDATE  | Update of player position              |
+   | 4     | MAP_DESC       | Description of the game map            |
+   | 5     | INPUT          | Player input event                     |
+   | 6     | PLAYER_STATS   | Player statistics update               |
+   | 7     | GAME_ENDED     | Game has ended                         |
+   | 8     | GAME_STARTED   | Game has started                       |
+   +-------+----------------+----------------------------------------+
+
+5.2. Packet Formats
+
+   This section describes the format of each packet type.
+
+5.2.1. Generic Packet
+
+   The generic packet structure is used by simple packets that do not
+   contain additional data beyond the packet type:
+
+   +-----------+--------+----------------------------------------+
+   | Field     | Type   | Description                            |
+   +-----------+--------+----------------------------------------+
+   | type      | uint8_t| Packet type                            |
+   +-----------+--------+----------------------------------------+
+
+   Packet types using this structure include:
+   - ACKNOWLEDGE
+   - HELLO
+   - GAME_STARTED
+
+5.2.2. Player Update Packet
+
+   Used by the server to update clients about player positions:
+
+   +-----------+----------+----------------------------------------+
+   | Field     | Type     | Description                            |
+   +-----------+----------+----------------------------------------+
+   | type      | uint8_t  | PLAYER_UPDATE (3)                      |
+   | x         | float32_t| X-coordinate of the player             |
+   | y         | float32_t| Y-coordinate of the player             |
+   | on_the_   | int32_t  | Boolean indicating if player is on     |
+   | floor     |          | solid ground (1) or not (0)            |
+   +-----------+----------+----------------------------------------+
+
+   The server MUST send a PLAYER_UPDATE packet after every player
+   computation cycle in the map, which includes gravity calculations 
+   and other physics updates affecting the player's position.
+
+5.2.3. Map Description Packet
+
+   Used by the server to send the complete map layout to clients:
+
+   +-----------+------+--------------------------------------------+
+   | Field     | Type | Description                                |
+   +-----------+------+--------------------------------------------+
+   | type      |uint8_t| MAP_DESC (4)                              |
+   | map       |char[][]| Two-dimensional array of characters      |
+   |           |      | representing the map, with dimensions      |
+   |           |      | MAP_ROWS (10) × MAP_COLS (95)              |
+   +-----------+------+--------------------------------------------+
+
+   The map field contains MAP_ROWS × MAP_COLS characters. Each character
+   represents a specific tile type as defined in Section 7.2.
+
+5.2.4. Input Packet
+
+   Used by the client to send player input events:
+
+   +-----------+--------+----------------------------------------+
+   | Field     | Type   | Description                            |
+   +-----------+--------+----------------------------------------+
+   | type      | uint8_t| INPUT (5)                              |
+   | input     | uint8_t| Input type: UP (0) or NONE (1)         |
+   +-----------+--------+----------------------------------------+
+
+   The input field indicates whether the player's jetpack is active:
+   - UP (0): Jetpack is active (spacebar is pressed)
+   - NONE (1): Jetpack is inactive (spacebar is released)
+
+5.2.5. Player Stats Packet
+
+   Used by the server to update player statistics:
+
+   +-----------+--------+----------------------------------------+
+   | Field     | Type   | Description                            |
+   +-----------+--------+----------------------------------------+
+   | type      | uint8_t| PLAYER_STATS (6)                       |
+   | dead      | int32_t| Boolean indicating if player is dead   |
+   |           |        | (1) or alive (0)                       |
+   | score     | int32_t| Current player score                   |
+   +-----------+--------+----------------------------------------+
+
+   The server MUST send a PLAYER_STATS packet immediately after any
+   change to the player's statistics occurs, such as when:
+   - The player dies (collides with a zapper)
+   - The player collects a coin (score increases)
+   - The player respawns (death status changes)
+
+5.2.6. Game Ended Packet
+
+   Used by the server to indicate the game has ended:
+
+   +-----------+--------+----------------------------------------+
+   | Field     | Type   | Description                            |
+   +-----------+--------+----------------------------------------+
+   | type      | uint8_t| GAME_ENDED (7)                         |
+   | winner_id | int32_t| ID of the winning player               |
+   | client_won| int32_t| Boolean indicating if the receiving    |
+   |           |        | client won (1) or lost (0)             |
+   +-----------+--------+----------------------------------------+
+
+6. Protocol Flow
+
+6.1. Client to Server Communication
+
+   The client sends packets to the server in the following scenarios:
+
+6.1.1. Connection Initialization
+
+   When a client connects to the server, it SHOULD send a HELLO packet
+   to initiate the connection:
+
+   +--------+
+   | 0x02   | HELLO packet type
+   +--------+
+
+6.1.2. Player Input
+
+   When the player presses the spacebar, the client MUST send an INPUT
+   packet with input type UP:
+
+   +--------+--------+
+   | 0x05   | 0x00   | INPUT packet type with UP input
+   +--------+--------+
+
+   When the player releases the spacebar, the client MUST send an INPUT
+   packet with input type NONE:
+
+   +--------+--------+
+   | 0x05   | 0x01   | INPUT packet type with NONE input
+   +--------+--------+
+
+6.2. Server to Client Communication
+
+   The server sends packets to clients in the following scenarios:
+
+6.2.1. Connection Establishment
+
+   When a client connects, the server SHOULD respond with a ACKNOWLEDGE packet
+   to acknowledge the connection:
+
+   +--------+
+   | 0x01   | ACKNOWLEDGE packet type
+   +--------+
+
+   The server SHOULD then send a MAP_DESC packet containing the current
+   map layout.
+
+6.2.2. Game Start
+
+   When the game starts (typically when two players have connected),
+   the server SHOULD send a GAME_STARTED packet:
+
+   +--------+
+   | 0x08   | GAME_STARTED packet type
+   +--------+
+
+6.2.3. Game Updates
+
+   During gameplay, the server MUST send packets according to the
+   following rules:
+
+   - PLAYER_UPDATE packets MUST be sent after every player compute cycle
+     in the game loop that updates positions (including gravity,
+     velocity, and collision calculations)
+   
+   - PLAYER_STATS packets MUST be sent immediately after any change to
+     player statistics occurs (death, score change, etc.)
+
+6.2.4. Game End
+
+   When the game ends, the server SHOULD send a GAME_ENDED packet:
+
+   +--------+--------+--------+
+   | 0x07   | winner | result | GAME_ENDED with winner ID and result
+   +--------+--------+--------+
+
+7. Map Format
+
+7.1. Map Dimensions
+
+   Each map MUST have exactly 10 rows and 95 columns. Maps are
+   transmitted from the server to clients using the MAP_DESC packet.
+
+7.2. Map Elements
+
+   Maps use the following characters to represent different elements:
+
+   +----------+-------------------------------------------------+
+   | Character| Description                                     |
+   +----------+-------------------------------------------------+
+   | '_'      | Empty space that players can move through       |
+   | 'e'      | Zapper (electrical hazard) that kills players   |
+   |          | on contact                                      |
+   | 'c'      | Coin that can be collected to increase score    |
+   +----------+-------------------------------------------------+
+
+   Any character not defined in this table MUST be treated as an ERROR
+   by implementations. Implementations SHOULD reject maps containing
+   undefined characters and SHOULD report the error condition.
+
+7.3. Map Example
+
+   Below is an example of a valid map:
+
+   _____________________________e__________________________________
+   _____________________________e______cccccc_______________________
+   _____________________________e_____ccccccc____________eeeeeeeeee
+   _____________________________e____cc_______________________________
+   _____________________________e___cc______e_____________cccc_______
+   ______________________________cc_______e_____________cccc_________
+   ________________________ccccccc________e________________________
+   ________________________cccccc_________e_________eeeeeeeeeeeee___
+   _______________________________________e________________________
+   _______________________________________e________________________
+
+   This map features:
+   - A vertical line of zappers ('e') near the left side
+   - A cluster of coins ('c') in the middle section
+   - Several additional zappers on the right side of the map
+   - Various coin formations creating platforms and obstacles
+
+8. Security Considerations
+
+   This protocol does not implement encryption or authentication 
+   mechanisms. It is designed for use in trusted environments only. 
+   Implementers should be aware of the following risks:
+
+   - Packet spoofing: Malicious actors could forge packets to manipulate
+     game state
+   - Denial of service: The server must implement rate limiting to
+     prevent clients from sending excessive packets
+   - Input validation: All received packets should be validated before
+     processing to prevent buffer overflows and other vulnerabilities
+
+9. References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+Appendix A. Acknowledgements
+
+   Thanks to all contributors who helped develop the Jetpack game and
+   its protocol.
