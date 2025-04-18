@@ -8,6 +8,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 namespace jetpack::graphical
 {
@@ -23,5 +24,6 @@ namespace jetpack::graphical
         private:
             sf::Texture _texture;
             sf::Sprite _sprite;
+	    sf::Sprite _sprite_rep;
     };
 };
