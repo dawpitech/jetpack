@@ -13,11 +13,6 @@ Status of This Memo
    This document is a product of independent work. It does not 
    represent the consensus of any standards body.
 
-Copyright Notice
-
-   Copyright (c) 2025 IETF Trust and the persons identified as the
-   document authors. All rights reserved.
-
 Abstract
 
    This document describes the protocol used by the Jetpack game, a
