@@ -12,10 +12,11 @@
 Arguments::Arguments() {
     this->m_ip = "127.0.0.1";
     this->m_port = 1234;
+    this->m_debug_mode = false;
 }
 
 bool Arguments::parseArguments(const int argc, const char **argv) {
-    if (argc > 5) {
+    if (argc > 6) {
         this->showHelp();
         return false;
     }
@@ -43,6 +44,10 @@ bool Arguments::parseArguments(const int argc, const char **argv) {
             this->m_port = static_cast<unsigned short>(port);
             continue;
         }
+        if (arg == "-d") {
+            this->m_debug_mode = true;
+            continue;
+        }
         this->showHelp();
         return false;
     }
@@ -53,7 +58,8 @@ void Arguments::showHelp(void) const {
     std::cout << "Usage: ./jetpack_client [options]\n"
               << "\nOptions:\n"
               << "  -i <ip>      IP address to connect to (default: 127.0.0.1)\n"
-              << "  -p <port>    Port number to use       (default: 1234)\n";
+              << "  -p <port>    Port number to use       (default: 1234)\n"
+              << "  [-d]         Enable debug mode        (default: false)\n";
 }
 
 unsigned short Arguments::getPort(void) const {
@@ -62,4 +68,8 @@ unsigned short Arguments::getPort(void) const {
 
 std::string Arguments::getIp(void) const {
     return this->m_ip;
+}
+
+bool Arguments::getDebugMode(void) const {
+    return this->m_debug_mode;
 }

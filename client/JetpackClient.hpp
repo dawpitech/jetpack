@@ -17,7 +17,8 @@
 class JetpackClient
 {
     public:
-        JetpackClient(const std::string &ip, unsigned short port);
+        JetpackClient(const std::string &ip, const unsigned short port,
+            const bool debug_mode);
         ~JetpackClient() = default;
 
         void run();

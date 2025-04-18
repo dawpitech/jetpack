@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "server.h"
+#include "logger.h"
 
 void send_map(client_t *client)
 {
@@ -18,4 +19,5 @@ void send_map(client_t *client)
     for (int y = 0; y < MAP_ROWS; ++y)
         memcpy(map_p.map[y], client->map[y], MAP_COLS);
     write(client->network_fd, &map_p, sizeof(map_p));
+    logc(client, INFO, "Sent map infos");
 }

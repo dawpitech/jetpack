@@ -11,10 +11,11 @@
 #include <iostream>
 #include "network/packets.h"
 
-jetpack::graphical::GraphicalClient::GraphicalClient()
+jetpack::graphical::GraphicalClient::GraphicalClient(const bool _debug_mode)
     : _window(sf::VideoMode(800, 500), "Jetpack sadride"), _player()
 {
     this->_window.setFramerateLimit(30);
+    this->m_debug = _debug_mode;
 }
 
 void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, ClientData &clientData)
@@ -49,14 +50,16 @@ void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, Clien
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Space && !up) {
                 clientData.input_queue.push(UP);
-                std::cout << "INGEST SPACE UP INPUT" << std::endl;
+                if (this->m_debug)
+                    std::cout << "INGEST SPACE UP INPUT" << std::endl;
                 up = true;
             }
         }
         if (event.type == sf::Event::KeyReleased) {
             if (event.key.code == sf::Keyboard::Space && up) {
                 clientData.input_queue.push(NONE);
-                std::cout << "INGEST SPACE RELEASE INPUT" << std::endl;
+                if (this->m_debug)
+                    std::cout << "INGEST SPACE RELEASE INPUT" << std::endl;
                 up = false;
             }
         }
@@ -65,7 +68,6 @@ void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, Clien
 
 void jetpack::graphical::GraphicalClient::render()
 {
-    std::cout << "render" << std::endl;
     this->_window.clear();
 
     this->_background.render(this->_window);

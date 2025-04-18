@@ -15,15 +15,18 @@
 #include "client/utils/Logger.hpp"
 #include "network/packets.h"
 
-jetpack::network::NetworkClient::NetworkClient(const std::string &ip, const unsigned short port)
+jetpack::network::NetworkClient::NetworkClient(const std::string &ip, const unsigned short port,
+    const bool _debug_mode)
     : network_sock{.sin_family = AF_INET, .sin_port = 0, .sin_addr = 0, .sin_zero = 0}, network_fd(0)
 {
+    this->setDebugMode(_debug_mode);
     this->network_sock.sin_port = htons(port);
     this->network_sock.sin_addr.s_addr = inet_addr(ip.c_str());
     this->network_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(this->network_fd, reinterpret_cast<sockaddr *>(&this->network_sock), sizeof(this->network_sock)) == 1)
         throw std::exception();
-    Logger::get() << "[INFO] Connected to server " << inet_ntoa(this->network_sock.sin_addr) << ":" << ntohs(this->network_sock.sin_port);
+    if (this->debug_mode)
+	Logger::get() << "[INFO] Connected to server " << inet_ntoa(this->network_sock.sin_addr) << ":" << ntohs(this->network_sock.sin_port);
 
     constexpr packet_generic_t packet{.type = HELLO};
     write(this->network_fd, &packet, sizeof(packet));
@@ -60,7 +63,8 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
 
             write(this->network_fd, &packet, sizeof(packet_input_t));
             clientData.input_queue.pop();
-            std::cout << "SEND INPUT EVENT" << std::endl;
+	    if (this->debug_mode)
+		std::cout << "SEND INPUT EVENT" << std::endl;
         }
         if (!to_read)
             continue;
@@ -74,6 +78,8 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
             case PLAYER_UPDATE:
             {
                 const auto packet = reinterpret_cast<packet_player_update_t*>(&buff);
+		if (this->debug_mode)
+		    std::cout << "Recieved PLAYER_UPDATE packet" << std::endl;
                 clientData.playerPosition.x = packet->x;
                 clientData.playerPosition.y = packet->y;
                 clientData.playerOnFloor = packet->on_the_floor;
@@ -83,6 +89,8 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
             {
                 const auto packet = reinterpret_cast<packet_player_stats_t*>(&buff);
 
+		if (this->debug_mode)
+		    std::cout << "Recieved PLAYER_STATS packet" << std::endl;
                 clientData.score = packet->score;
                 clientData.isDead = packet->dead;
                 break;
@@ -91,6 +99,8 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
             {
                 const auto packet = reinterpret_cast<packet_map_desc_t*>(&buff);
 
+		if (this->debug_mode)
+		    std::cout << "Recieved MAP_DESC packet" << std::endl;
                 for (int y = 0; y < MAP_ROWS; ++y) {
                     for (int x = 0; x < MAP_COLS; ++x) {
                         clientData.map[y][x].store(packet->map[y][x], std::memory_order_relaxed);
@@ -102,18 +112,27 @@ void jetpack::network::NetworkClient::handleNetwork(std::mutex& mtx, ClientData&
             {
                 const auto packet = reinterpret_cast<packet_game_ended_t*>(&buff);
 
-		clientData.won = packet->client_won == 0 ? false : true;
-		clientData.winner_id = packet->winner_id;
-		clientData.gameEnded = true;
+		if (this->debug_mode)
+		    std::cout << "Recieved GAME_ENDED packet" << std::endl;
+                clientData.won = packet->client_won == 0 ? false : true;
+                clientData.winner_id = packet->winner_id;
+                clientData.gameEnded = true;
                 break;
             }
-	    case GAME_STARTED:
-	    {
-		clientData.gameStarted = true;
+            case GAME_STARTED:
+            {
+		if (this->debug_mode)
+		    std::cout << "Recieved GAME_STARTED packet" << std::endl;
+                clientData.gameStarted = true;
                 break;
-	    }
+            }
             default:
                 break;
         }
     }
+}
+
+void jetpack::network::NetworkClient::setDebugMode(bool debug)
+{
+    this->debug_mode = debug;
 }

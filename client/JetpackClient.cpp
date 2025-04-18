@@ -9,8 +9,9 @@
 
 #include <iostream>
 
-JetpackClient::JetpackClient(const std::string &ip, const unsigned short port):
-    _network(ip, port)
+JetpackClient::JetpackClient(const std::string &ip, const unsigned short port,
+    const bool debug_mode):
+    _network(ip, port, debug_mode), _graphical(debug_mode)
 {
     this->_network.run(this->clientDataMutex, this->clientData);
 }

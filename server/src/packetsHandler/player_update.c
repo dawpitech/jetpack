@@ -16,15 +16,18 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include "logger.h"
 
 void hello_handler(client_t *client, server_t *server,
     char buff[PACKET_BUFFER_SIZE])
 {
     const packet_generic_t packet = {.type = ACKNOWLEDGE};
 
+    logc(client, INFO, "Recieved HELLO");
     (void)buff;
     client->status = CONNECTED;
     write(client->network_fd, &packet, sizeof(packet));
+    logc(client, INFO, "Sent ACKNOWLEDGE");
     for (int y = 0; y < MAP_ROWS; ++y)
         memcpy(client->map[y], server->map[y], MAP_COLS);
     send_map(client);
@@ -41,6 +44,7 @@ void input_handler(client_t *client, server_t *server,
     } else if (packet_input->input == NONE) {
         client->going_up = false;
     }
+    logc(client, INFO, "Recieved input %s", client->going_up ? "UP" : "NONE");
     update_player(client);
 }
 
@@ -50,6 +54,7 @@ void send_player_stats(client_t *client)
         .dead = client->player_dead, .score = client->player_score};
 
     write(client->network_fd, &packet, sizeof(packet));
+    logc(client, INFO, "Sent player stats");
 }
 
 static void send_game_ended_internal(server_t *server,
@@ -61,6 +66,7 @@ static void send_game_ended_internal(server_t *server,
         if (best_player == j)
             packet[j].client_won = 1;
         write(server->clients[j].network_fd, &(packet[j]), sizeof(packet[j]));
+        logc(&(server->clients[j]), INFO, "Sent GAME_ENDED");
     }
 }
 
@@ -94,5 +100,6 @@ void send_game_started(server_t *server)
         if (server->clients[i].game_ended)
             continue;
         write(server->clients[i].network_fd, &packet, sizeof(packet));
+        logc(&(server->clients[i]), INFO, "Sent GAME_STARTED");
     }
 }

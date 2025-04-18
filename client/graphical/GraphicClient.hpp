@@ -19,7 +19,7 @@ namespace jetpack::graphical
     class GraphicalClient
     {
         public:
-            GraphicalClient();
+            GraphicalClient(const bool _debug_mode);
              ~GraphicalClient() = default;
 
             void render();
@@ -28,6 +28,7 @@ namespace jetpack::graphical
         private:
             sf::RenderWindow _window;
             Player _player;
+	    bool m_debug;
             Background _background;
     };
 }

@@ -17,7 +17,8 @@ int main(const int argc, const char **argv)
     if (!arg_parser.parseArguments(argc, argv))
         return 84;
 
-    JetpackClient client{arg_parser.getIp(), arg_parser.getPort()};
+    JetpackClient client{arg_parser.getIp(), arg_parser.getPort(),
+        arg_parser.getDebugMode()};
     client.run();
     return 0;
 }
