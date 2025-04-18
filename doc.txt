@@ -174,15 +174,15 @@ Table of Contents
 
    Used by the server to update clients about player positions:
 
-   +-----------+----------+----------------------------------------+
-   | Field     | Type     | Description                            |
-   +-----------+----------+----------------------------------------+
-   | type      | uint8_t  | PLAYER_UPDATE (3)                      |
-   | x         | float32_t| X-coordinate of the player             |
-   | y         | float32_t| Y-coordinate of the player             |
-   | on_the_   | int32_t  | Boolean indicating if player is on     |
-   | floor     |          | solid ground (1) or not (0)            |
-   +-----------+----------+----------------------------------------+
+   +--------------+----------+----------------------------------------+
+   | Field        | Type     | Description                            |
+   +--------------+----------+----------------------------------------+
+   | type         | uint8_t  | PLAYER_UPDATE (3)                      |
+   | x            | float32_t| X-coordinate of the player             |
+   | y            | float32_t| Y-coordinate of the player             |
+   | on_the_floor | int32_t  | Boolean indicating if player is on     |
+   |              |          | solid ground (1) or not (0)            |
+   +--------------+----------+----------------------------------------+
 
    The server MUST send a PLAYER_UPDATE packet after every player
    computation cycle in the map, which includes gravity calculations 
@@ -192,14 +192,14 @@ Table of Contents
 
    Used by the server to send the complete map layout to clients:
 
-   +-----------+------+--------------------------------------------+
-   | Field     | Type | Description                                |
-   +-----------+------+--------------------------------------------+
-   | type      |uint8_t| MAP_DESC (4)                              |
-   | map       |char[][]| Two-dimensional array of characters      |
-   |           |      | representing the map, with dimensions      |
-   |           |      | MAP_ROWS (10) × MAP_COLS (95)              |
-   +-----------+------+--------------------------------------------+
+   +-----------+----------+--------------------------------------------+
+   | Field     | Type     | Description                                |
+   +-----------+----------+--------------------------------------------+
+   | type      | uint8_t  | MAP_DESC (4)                               |
+   | map       | char[][] | Two-dimensional array of characters        |
+   |           |          | representing the map, with dimensions      |
+   |           |          | MAP_ROWS (10) × MAP_COLS (95)              |
+   +-----------+----------+--------------------------------------------+
 
    The map field contains MAP_ROWS × MAP_COLS characters. Each character
    represents a specific tile type as defined in Section 7.2.
