@@ -23,6 +23,8 @@ namespace jetpack::graphical
 
         private:
             sf::Texture _texture;
+	    sf::Texture _finish_tex;
+	    sf::Sprite _finish_sprite;
             sf::Sprite _sprite;
 	    sf::Sprite _sprite_rep;
     };
