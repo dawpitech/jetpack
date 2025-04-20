@@ -23,11 +23,12 @@ void hello_handler(client_t *client, server_t *server,
 {
     const packet_generic_t packet = {.type = ACKNOWLEDGE};
 
-    logc(client, INFO, "Recieved HELLO");
+    logc(client, INFO, "Received HELLO packet");
     (void)buff;
     client->status = CONNECTED;
-    write(client->network_fd, &packet, sizeof(packet));
-    logc(client, INFO, "Sent ACKNOWLEDGE");
+    if (write(client->network_fd, &packet, sizeof(packet)) <= 0)
+        return;
+    logc(client, INFO, "Sent ACKNOWLEDGE packet to client");
     for (int y = 0; y < MAP_ROWS; ++y)
         memcpy(client->map[y], server->map[y], MAP_COLS);
     send_map(client);
@@ -44,7 +45,8 @@ void input_handler(client_t *client, server_t *server,
     } else if (packet_input->input == NONE) {
         client->going_up = false;
     }
-    logc(client, INFO, "Recieved input %s", client->going_up ? "UP" : "NONE");
+    logc(client, INFO, "Received input packet, new state is %s",
+        client->going_up ? "UP" : "NONE");
     update_player(client);
 }
 
@@ -53,7 +55,8 @@ void send_player_stats(client_t *client)
     const packet_player_stats_t packet = {.type = PLAYER_STATS,
         .dead = client->player_dead, .score = client->player_score};
 
-    write(client->network_fd, &packet, sizeof(packet));
+    if (write(client->network_fd, &packet, sizeof(packet)) <= 0)
+        return;
     logc(client, INFO, "Sent player stats");
 }
 
@@ -65,7 +68,9 @@ static void send_game_ended_internal(server_t *server,
         packet[j].winner_id = best_player;
         if (best_player == j)
             packet[j].client_won = 1;
-        write(server->clients[j].network_fd, &(packet[j]), sizeof(packet[j]));
+        if (write(server->clients[j].network_fd, &(packet[j]),
+            sizeof(packet[j])) <= 0)
+            return;
         logc(&(server->clients[j]), INFO, "Sent GAME_ENDED");
     }
 }
@@ -99,7 +104,9 @@ void send_game_started(server_t *server)
     for (size_t i = 0; i < server->connected_client_nb; i++) {
         if (server->clients[i].game_ended)
             continue;
-        write(server->clients[i].network_fd, &packet, sizeof(packet));
+        if (write(server->clients[i].network_fd, &packet, sizeof(packet))
+            <= 0)
+            return;
         logc(&(server->clients[i]), INFO, "Sent GAME_STARTED");
     }
 }
