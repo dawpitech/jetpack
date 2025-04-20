@@ -51,7 +51,7 @@ void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, Clien
             if (event.key.code == sf::Keyboard::Space && !up) {
                 clientData.input_queue.push(UP);
                 if (this->m_debug)
-                    std::cout << "INGEST SPACE UP INPUT" << std::endl;
+                    std::cout << "[TRACE] INGEST SPACE UP INPUT" << std::endl;
                 up = true;
             }
         }
@@ -59,7 +59,7 @@ void jetpack::graphical::GraphicalClient::updateDataCache(std::mutex &mtx, Clien
             if (event.key.code == sf::Keyboard::Space && up) {
                 clientData.input_queue.push(NONE);
                 if (this->m_debug)
-                    std::cout << "INGEST SPACE RELEASE INPUT" << std::endl;
+                    std::cout << "[TRACE] INGEST SPACE RELEASE INPUT" << std::endl;
                 up = false;
             }
         }
