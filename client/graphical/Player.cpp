@@ -108,6 +108,7 @@ void jetpack::graphical::Player::render(sf::RenderWindow& window) {
         this->_generic_text.setString(this->won ? "You won !" : "You lost :/");
         this->_generic_text.setPosition({(800.f / 2) - 50.f, 500.f / 2});
         window.draw(this->_generic_text);
+        window.draw(this->_sprite);
         if (!this->won) {
             this->_generic_text.setString("Player " + std::to_string(this->winnerId + 1) + " won.");
             this->_generic_text.setPosition({(800.f / 2) - 60.f, (500.f / 2) + 30.f});
@@ -132,7 +133,7 @@ void jetpack::graphical::Player::setPos(const float x, const float y) {
 }
 
 void jetpack::graphical::Player::setOnFloor(const bool state) {
-    if (this->lastOnFloor && !state) {
+    if (this->lastOnFloor && !state && this->gameStarted) {
         this->_jetpack_snd.play();
     }
     else if (!this->lastOnFloor && state) {
