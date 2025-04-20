@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -57,5 +58,15 @@ namespace jetpack::graphical
             std::size_t _coins_current_asset_tile;
             std::size_t _zapper_current_asset_tile;
             bool _onFloor;
+            
+            int lastScore; 
+            bool lastDeadState;
+            bool lastOnFloor;
+            sf::SoundBuffer _jetpack_buf;
+            sf::SoundBuffer _coin_buf;
+            sf::SoundBuffer _death_buf;
+            sf::Sound       _jetpack_snd;
+            sf::Sound       _coin_snd;
+            sf::Sound       _death_snd;
     };
 };

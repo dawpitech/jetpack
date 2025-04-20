@@ -15,17 +15,33 @@
 #include "client/utils/Logger.hpp"
 #include "network/map.h"
 
-jetpack::graphical::Player::Player(): _current_asset_tile(0), _coins_current_asset_tile(0),
-    _zapper_current_asset_tile(0), _onFloor(false)
+jetpack::graphical::Player::Player(): _current_asset_tile(0), _coins_current_asset_tile(0), _zapper_current_asset_tile(0), _onFloor(false)
 {
     this->isDead = false;
+    this->lastDeadState = false;
+    this->lastOnFloor = true;
+    this->score = 0;
+    this->lastScore = 0;
+
     this->_font.loadFromFile("assets/comicsans.ttf");
     this->_score_text.setFont(this->_font);
     this->_generic_text.setFont(this->_font);
     this->_generic_text.setCharacterSize(20);
     this->_score_text.setCharacterSize(20);
     this->_sprite.setScale(0.3f, 0.3f);
-    this->score = 0;
+
+    if (!this->_jetpack_buf.loadFromFile("assets/jetpack.wav"))
+        throw std::exception();
+    this->_jetpack_snd.setBuffer(this->_jetpack_buf);
+    this->_jetpack_snd.setLoop(true);
+
+    if (!this->_coin_buf.loadFromFile("assets/coin.wav"))
+        throw std::exception();
+    this->_coin_snd.setBuffer(this->_coin_buf);
+
+    if (!this->_death_buf.loadFromFile("assets/death.wav"))
+       throw std::exception();
+    this->_death_snd.setBuffer(this->_death_buf);
 }
 
 void jetpack::graphical::Player::render(sf::RenderWindow& window) {
@@ -116,14 +132,30 @@ void jetpack::graphical::Player::setPos(const float x, const float y) {
 }
 
 void jetpack::graphical::Player::setOnFloor(const bool state) {
+    if (this->lastOnFloor && !state) {
+        this->_jetpack_snd.play();
+    }
+    else if (!this->lastOnFloor && state) {
+        this->_jetpack_snd.stop();
+    }
+    this->lastOnFloor = state;
     this->_onFloor = state;
 }
 
 void jetpack::graphical::Player::setIsDead(const bool dead) {
+    if (dead && !this->lastDeadState) {
+        this->_death_snd.play();
+        this->_jetpack_snd.stop();
+    }
+    this->lastDeadState = dead;
     this->isDead = dead;
 }
 
 void jetpack::graphical::Player::setScore(const int _score) {
+    if (_score > this->lastScore) {
+        this->_coin_snd.play();
+    }
+    this->lastScore = _score;
     this->score = _score;
 }
 
